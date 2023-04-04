@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from configuration import API_KEY
 from address_book_app.core.logger import logger
 from address_book_app.schema.api_request_schema import AddressDetails, OutAddressDetails
-from address_book_app.helpers import crud_helper_func
+from address_book_app.helpers import crud_helper_func, others_helper_func
 from address_book_app.core.sqlite_db_connection import get_db
 
 
@@ -30,8 +30,10 @@ async def create_address(location_address: AddressDetails = Body(...), db : Sess
     try:
         geolocation = Nominatim(user_agent = "MyApp")
         location = geolocation.geocode(location_address["address"])
+        # get the distance of provide address with current location and distance will found in KM.
+        loc_distance = others_helper_func.get_distance(location.latitude, location.longitude)
         if location:
-            await crud_helper_func.create(location.address, location.latitude, location.longitude, db)
+            await crud_helper_func.create(location.address, location.latitude, location.longitude, loc_distance, db)
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"message": "address created successfully!"})
         else:
             return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={"message": "location addres is not valid!"})
@@ -60,8 +62,10 @@ async def update_address(address_id: int, location_address: AddressDetails = Bod
     try:
         geolocation = Nominatim(user_agent = "MyApp")
         location = geolocation.geocode(location_address["address"])
+        # get the distance of provide address with current location and distance will found in KM.
+        loc_distance = others_helper_func.get_distance(location.latitude, location.longitude)
         if location:
-            res_data = await crud_helper_func.update(address_id, location.address, location.latitude, location.longitude, db)
+            res_data = await crud_helper_func.update(address_id, location.address, location.latitude, location.longitude, loc_distance, db)
             return res_data
         else:
             return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={"message": "location addres is not valid!"})
@@ -89,6 +93,24 @@ async def get_address(skip: int = 0, limit: int = 10, db : Session = Depends(get
         logger.info("address occurs some error.")
         raise HTTPException(detail=f"error : {err}", status_code=status.HTTP_400_BAD_REQUEST)
 
+
+@routes.get('/get_address_by_distance_coordinates')
+async def get_address(lattitude: float = 0.0, longitude: float = 0.0, distance: float = 0.0,  db : Session = Depends(get_db)):
+    """
+    Use to get the address within co-ordinates and distnace from address book.
+
+    Request Args:
+        location_address (Address) : take the latitude , longitude and distance as arguments.
+
+    Reposnse:
+        output (message): return all address that come within range of coordinates and distance of address book.
+    """
+    try:
+        res_data = await crud_helper_func.get_by_obj_keys(lattitude, longitude, distance, db)
+        return res_data
+    except Exception as err:
+        logger.info("address occurs some error.")
+        raise HTTPException(detail=f"error : {err}", status_code=status.HTTP_400_BAD_REQUEST)
         
     
 @routes.delete('/delete_address/{address_id}')

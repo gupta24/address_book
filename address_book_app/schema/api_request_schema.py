@@ -19,6 +19,7 @@ class OutAddressDetails(BaseModel):
     address: str
     x_coordinates: float
     y_coordinates: float
+    location_distance: float
 
     class Config:
         orm_mode = True
