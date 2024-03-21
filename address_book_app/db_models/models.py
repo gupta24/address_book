@@ -11,4 +11,3 @@ class AddressBook(Base):
     address = Column(String, unique=True, nullable=False)
     x_coordinates = Column(Float, nullable=False)
     y_coordinates = Column(Float, nullable=False)
-    location_distance = Column(Float, nullable=False)

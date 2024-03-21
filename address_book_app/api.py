@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from address_book_app.core.sqlite_db_connection import engine
 from address_book_app.db_models import models
-from address_book_app.endpoints_v1.address_crud_apis import routes as address_book_route
+from address_book_app.endpoints_v1.address_apis import routes as address_book_route
 
 
 models.Base.metadata.create_all(bind=engine)
