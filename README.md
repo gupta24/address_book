@@ -43,4 +43,6 @@ $ python3 main.py
    
    DELETE : http://127.0.0.1:8080/docs#/geolocation/delete_address/{address_id}
 
+   POST :   http://127.0.0.1:8080/docs#/geolocation/search_address
+
    And address_id can be 1 or 2 or 3 or 4 or .... 100
